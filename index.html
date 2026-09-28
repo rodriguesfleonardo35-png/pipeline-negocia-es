@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Painel anonimizado de acompanhamento da pipeline comercial.">
+  <title>Pipeline Comercial — CRM</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --border: #e4e7ec;
+      --primary: #3448c5;
+      --primary-light: #eef0ff;
+      --green: #067647;
+      --green-light: #ecfdf3;
+      --amber: #b54708;
+      --amber-light: #fffaeb;
+      --shadow: 0 8px 24px rgba(16, 24, 40, .06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    .container {
+      width: min(1400px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 34px 0 24px;
+      color: white;
+      background: linear-gradient(120deg, #202c83, #4859d6);
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+    }
+
+    header p {
+      max-width: 850px;
+      margin: 0;
+      color: #e5e9ff;
+      line-height: 1.55;
+    }
+
+    main { padding: 24px 0 48px; }
+
+    .notice {
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      border: 1px solid #fedf89;
+      border-radius: 12px;
+      background: var(--amber-light);
+      color: #7a2e0e;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat, .panel {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .stat { padding: 18px; }
+
+    .stat-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .stat-value {
+      font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+      font-weight: 750;
+      letter-spacing: -.03em;
+    }
+
+    .panel { overflow: hidden; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(160px, .8fr));
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid #cfd4dc;
+      border-radius: 9px;
+      color: var(--text);
+      background: white;
+      font: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid #d9ddff;
+      border-color: var(--primary);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #475467;
+      background: #f9fafb;
+      font-size: .78rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    td { font-size: .91rem; line-height: 1.45; }
+    tbody tr:hover { background: #fafbff; }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .contact { font-weight: 750; white-space: nowrap; }
+    .date, .amount { white-space: nowrap; }
+    .amount { font-weight: 700; }
+
+    .badge {
+      display: inline-block;
+      margin: 2px 4px 2px 0;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-won {
+      color: var(--green);
+      background: var(--green-light);
+    }
+
+    .badge-active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .muted { color: var(--muted); }
+    .empty { padding: 28px; text-align: center; color: var(--muted); }
+    .result-count { padding: 12px 16px; color: var(--muted); font-size: .88rem; }
+
+    footer {
+      padding: 18px 0 30px;
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 780px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 440px) {
+      .container { width: min(100% - 20px, 1400px); }
+      .stats { gap: 9px; }
+      .stat { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Pipeline Comercial</h1>
+      <p>
+        Visão resumida dos contatos do CRM, com etapa, valor registrado,
+        contexto comercial e próximo passo identificado nas notas.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="notice">
+      <strong>Versão para publicação:</strong> contatos identificados por número
+      e dados diretos de identificação removidos. O CSV original também contém
+      dados pessoais e comerciais que não devem ser publicados em um repositório
+      público sem autorização e revisão adequada.
+    </div>
+
+    <section class="stats" aria-label="Resumo da pipeline">
+      <article class="stat">
+        <span class="stat-label">Contatos na lista</span>
+        <div class="stat-value" id="totalContacts">—</div>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Etapa “Venda ganha”</span>
+        <div class="stat-value" id="wonContacts">—</div>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Valor total registrado</span>
+        <div class="stat-value" id="totalValue">—</div>
+      </article>
+      <article class="stat">
+        <span class="stat-label">Valor em “Venda ganha”</span>
+        <div class="stat-value" id="wonValue">—</div>
+      </article>
+    </section>
+
+    <section class="panel" aria-label="Lista de contatos">
+      <div class="toolbar">
+        <input
+          id="search"
+          type="search"
+          placeholder="Buscar por contato, perfil ou resumo…"
+          aria-label="Buscar contatos"
+        >
+        <select id="stageFilter" aria-label="Filtrar por etapa">
+          <option value="">Todas as etapas</option>
+        </select>
+        <select id="statusFilter" aria-label="Filtrar por status">
+          <option value="">Todos os status</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Contato</th>
+              <th>Criação</th>
+              <th>Status CRM</th>
+              <th>Etapa</th>
+              <th>Valor</th>
+              <th>Perfil / contexto</th>
+              <th>Resumo e próximo passo</th>
+            </tr>
+          </thead>
+          <tbody id="contactRows"></tbody>
+        </table>
+        <div id="emptyState" class="empty" hidden>
+          Nenhum contato corresponde aos filtros selecionados.
+        </div>
+      </div>
+      <div class="result-count" id="resultCount"></div>
+    </section>
+
+    <footer>
+      Os valores são os registrados no campo “value” do arquivo CSV e não
+      representam necessariamente valores recebidos. “Status CRM” e “Etapa”
+      foram mantidos como campos distintos, conforme aparecem na planilha.
+      Resumos editoriais foram condensados a partir das notas comerciais;
+      dados pessoais, documentos e diagnósticos individuais foram omitidos.
+    </footer>
+  </main>
+
+  <script>
+    const contacts = [
+      {
+        id: 1,
+        date: "28/09/2026 15:33",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Não informado",
+        summary: "Nota comercial indica reunião de alinhamento nesta semana para definir o fluxo de pagamento."
+      },
+      {
+        id: 2,
+        date: "26/09/2026 11:44",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 80000,
+        profile: "Proprietário de terreno; projeto na região Sudeste",
+        summary: "As notas indicam decisão de entrar na mentoria. Próximo passo: alinhar como viabilizar a entrada. O contato busca apresentar seu projeto e avançar com investidores."
+      },
+      {
+        id: 3,
+        date: "26/09/2026 10:17",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 50000,
+        profile: "Corretor; projeto na região Sul",
+        summary: "Quer conversar com a liderança para entender a utilidade do clube e o possível retorno. As notas mencionam área na região e busca por investidores/parceiros."
+      },
+      {
+        id: 4,
+        date: "26/09/2026 10:14",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 160000,
+        profile: "Atuação em mercado financeiro e negócios imobiliários",
+        summary: "Venda marcada como ganha. Há um cronograma de pagamentos parcelados registrado nas notas."
+      },
+      {
+        id: 5,
+        date: "26/09/2026 10:13",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 160000,
+        profile: "Empresário do setor hoteleiro",
+        summary: "Venda marcada como ganha. Possui projeto hoteleiro pronto e busca investidores, parceiros estratégicos e networking."
+      },
+      {
+        id: 6,
+        date: "25/09/2026 14:53",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Não informado",
+        summary: "Nota indica decisão pela entrada no clube e cadastro/vaga já garantidos. Próximo passo: organizar o formato de pagamento."
+      },
+      {
+        id: 7,
+        date: "25/09/2026 14:52",
+        status: "Aberto",
+        stage: "3º Contato DIA3 (Ligação + Wpp)",
+        value: 80000,
+        profile: "Proprietária de terreno; projeto na região Centro-Oeste",
+        summary: "Inscrição realizada e sinal enviado. A nota registra acompanhamento para confirmação de participação de uma convidada e continuidade da entrada no clube."
+      },
+      {
+        id: 8,
+        date: "24/09/2026 19:30",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Construtora e implantação hoteleira",
+        summary: "Contato marcado como de alta prioridade. Atua com construção e implantação de hotéis e atende grandes operadores do setor."
+      },
+      {
+        id: 9,
+        date: "24/09/2026 19:29",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 80000,
+        profile: "Proprietária e gestora de hotel",
+        summary: "Venda marcada como ganha. Tem terreno próprio e projeto hoteleiro de alto padrão; busca aporte para implantação e pretende manter a gestão."
+      },
+      {
+        id: 10,
+        date: "24/09/2026 19:18",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Perfil não especificado",
+        summary: "Nota registra reunião presencial para o dia seguinte e indica que é forte candidato a uma mentoria individual."
+      },
+      {
+        id: 11,
+        date: "24/09/2026 19:04",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 150000,
+        profile: "Hoteleiro",
+        summary: "Venda marcada como ganha. Nota registra contrato assinado e sinal pago; o saldo seria tratado posteriormente conforme o fluxo combinado."
+      },
+      {
+        id: 12,
+        date: "24/09/2026 18:55",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Proprietária de projeto de condo-hotel; região Sul",
+        summary: "Já estava em contato com outro integrante da equipe e inscrita no evento. Nota indica transferência do acompanhamento para esse responsável."
+      },
+      {
+        id: 13,
+        date: "24/09/2026 18:52",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 152000,
+        profile: "Consultoria de ecoturismo",
+        summary: "Venda marcada como ganha. Nota registra contrato assinado e pagamento parcial; o próximo passo é confirmar a conclusão do pagamento e o acesso ao clube."
+      },
+      {
+        id: 14,
+        date: "24/09/2026 18:50",
+        status: "Aberto",
+        stage: "Venda ganha",
+        value: 160000,
+        profile: "Arquiteta e desenvolvedora",
+        summary: "Venda marcada como ganha. Possui terreno e projetos próprios aprovados; havia reunião de acompanhamento registrada."
+      },
+      {
+        id: 15,
+        date: "24/09/2026 18:48",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Proprietária / empresária",
+        summary: "Estuda expansão de propriedade em operação para hotelaria, hotel-fazenda ou ecoturismo de luxo. Busca investidores qualificados e conexões estratégicas."
+      },
+      {
+        id: 16,
+        date: "24/09/2026 11:34",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 50000,
+        profile: "Corretora de imóveis e incorporação",
+        summary: "A nota indica que está sendo viabilizada a entrada de duas pessoas em conjunto em uma mentoria."
+      },
+      {
+        id: 17,
+        date: "24/09/2026 11:33",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 50000,
+        profile: "Engenharia / arquitetura; projeto na região Sul",
+        summary: "Desenvolve projeto de condo-hotel. Próximo passo indicado: apresentar a possibilidade de dividir uma vaga de mentoria com outra pessoa."
+      },
+      {
+        id: 18,
+        date: "24/09/2026 11:32",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Proprietário de terreno",
+        summary: "Nota indica contrato assinado. Próximo passo: alinhamento para entrada no clube e definição da forma de pagamento."
+      },
+      {
+        id: 19,
+        date: "24/09/2026 11:31",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Perfil não informado",
+        summary: "Nota registra contrato assinado e sinal pago. Próximo passo: reunião para organizar o fluxo de pagamento."
+      },
+      {
+        id: 20,
+        date: "15/07/2026 18:07",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 80000,
+        profile: "Arquiteta; hotelaria e desenvolvimento imobiliário",
+        summary: "Procura uma parceira ou parceiro para dividir a mentoria. A nota indica que a equipe está tentando viabilizar essa composição."
+      },
+      {
+        id: 21,
+        date: "15/05/2026 12:13",
+        status: "Aberto",
+        stage: "Negociação",
+        value: 160000,
+        profile: "Perfil não informado",
+        summary: "O CSV não contém notas comerciais ou próximo passo preenchido para este contato."
+      }
+    ];
+
+    const currency = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0
+    });
+
+    const rowsElement = document.getElementById("contactRows");
+    const searchElement = document.getElementById("search");
+    const stageFilter = document.getElementById("stageFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const emptyState = document.getElementById("emptyState");
+    const resultCount = document.getElementById("resultCount");
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[character]);
+    }
+
+    function populateFilters() {
+      const stages = [...new Set(contacts.map(contact => contact.stage))].sort();
+      const statuses = [...new Set(contacts.map(contact => contact.status))].sort();
+
+      stages.forEach(stage => {
+        const option = document.createElement("option");
+        option.value = stage;
+        option.textContent = stage;
+        stageFilter.appendChild(option);
+      });
+
+      statuses.forEach(status => {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = status;
+        statusFilter.appendChild(option);
+      });
+    }
+
+    function renderStats() {
+      const won = contacts.filter(contact => contact.stage === "Venda ganha");
+      const totalValue = contacts.reduce((sum, contact) => sum + contact.value, 0);
+      const wonValue = won.reduce((sum, contact) => sum + contact.value, 0);
+
+      document.getElementById("totalContacts").textContent = contacts.length;
+      document.getElementById("wonContacts").textContent = won.length;
+      document.getElementById("totalValue").textContent = currency.format(totalValue);
+      document.getElementById("wonValue").textContent = currency.format(wonValue);
+    }
+
+    function renderContacts() {
+      const query = searchElement.value.trim().toLocaleLowerCase("pt-BR");
+      const selectedStage = stageFilter.value;
+      const selectedStatus = statusFilter.value;
+
+      const filtered = contacts.filter(contact => {
+        const searchable = [
+          `Contato ${String(contact.id).padStart(2, "0")}`,
+          contact.profile,
+          contact.summary,
+          contact.stage,
+          contact.status
+        ].join(" ").toLocaleLowerCase("pt-BR");
+
+        return searchable.includes(query)
+          && (!selectedStage || contact.stage === selectedStage)
+          && (!selectedStatus || contact.status === selectedStatus);
+      });
+
+      rowsElement.innerHTML = filtered.map(contact => {
+        const isWon = contact.stage === "Venda ganha";
+        const badgeClass = isWon ? "badge-won" : "badge-active";
+
+        return `
+          <tr>
+            <td class="contact">Contato ${String(contact.id).padStart(2, "0")}</td>
+            <td class="date">${escapeHtml(contact.date)}</td>
+            <td><span class="badge badge-active">${escapeHtml(contact.status)}</span></td>
+            <td><span class="badge ${badgeClass}">${escapeHtml(contact.stage)}</span></td>
+            <td class="amount">${currency.format(contact.value)}</td>
+            <td>${escapeHtml(contact.profile)}</td>
+            <td>${escapeHtml(contact.summary)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      emptyState.hidden = filtered.length !== 0;
+      resultCount.textContent =
+        `Exibindo ${filtered.length} de ${contacts.length} contatos.`;
+    }
+
+    populateFilters();
+    renderStats();
+    renderContacts();
+
+    searchElement.addEventListener("input", renderContacts);
+    stageFilter.addEventListener("change", renderContacts);
+    statusFilter.addEventListener("change", renderContacts);
+  </script>
+</body>
+</html>
