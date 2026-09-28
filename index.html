@@ -4,579 +4,444 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Painel anonimizado de acompanhamento da pipeline comercial.">
-  <title>Pipeline Comercial — CRM</title>
+  <title>Pipeline Comercial</title>
   <style>
     :root {
-      --bg: #f4f6fb;
-      --surface: #ffffff;
-      --text: #172033;
-      --muted: #667085;
-      --border: #e4e7ec;
-      --primary: #3448c5;
-      --primary-light: #eef0ff;
-      --green: #067647;
-      --green-light: #ecfdf3;
-      --amber: #b54708;
-      --amber-light: #fffaeb;
-      --shadow: 0 8px 24px rgba(16, 24, 40, .06);
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: #121a2d;
+      --panel-light: #18233a;
+      --border: #26334f;
+      --text: #eef3ff;
+      --muted: #9eacc7;
+      --accent: #7c9cff;
+      --green: #62d6a5;
+      --yellow: #ffd166;
+      --blue: #72b7ff;
+      --shadow: 0 12px 32px rgba(0, 0, 0, .22);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at top left, rgba(87, 117, 218, .16), transparent 36rem),
+        var(--bg);
       color: var(--text);
-      background: var(--bg);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
     }
 
     .container {
-      width: min(1400px, calc(100% - 32px));
+      width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
+      padding: 42px 0 56px;
     }
 
     header {
-      padding: 34px 0 24px;
-      color: white;
-      background: linear-gradient(120deg, #202c83, #4859d6);
+      margin-bottom: 28px;
     }
 
-    header h1 {
+    .eyebrow {
       margin: 0 0 8px;
-      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
     }
 
-    header p {
-      max-width: 850px;
+    h1 {
       margin: 0;
-      color: #e5e9ff;
-      line-height: 1.55;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.1;
     }
 
-    main { padding: 24px 0 48px; }
+    .subtitle {
+      max-width: 720px;
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
 
-    .notice {
-      margin-bottom: 20px;
+    .privacy-note {
+      margin: 22px 0 26px;
       padding: 14px 16px;
-      border: 1px solid #fedf89;
+      border: 1px solid rgba(255, 209, 102, .34);
       border-radius: 12px;
-      background: var(--amber-light);
-      color: #7a2e0e;
-      line-height: 1.5;
+      background: rgba(255, 209, 102, .08);
+      color: #ffe6a6;
+      font-size: .92rem;
     }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
-      margin-bottom: 20px;
+      margin: 24px 0;
     }
 
-    .stat, .panel {
+    .stat-card,
+    .toolbar,
+    .record,
+    .empty-state {
       border: 1px solid var(--border);
       border-radius: 14px;
-      background: var(--surface);
+      background: rgba(18, 26, 45, .92);
       box-shadow: var(--shadow);
     }
 
-    .stat { padding: 18px; }
+    .stat-card {
+      padding: 18px;
+    }
 
     .stat-label {
-      display: block;
-      margin-bottom: 8px;
       color: var(--muted);
-      font-size: .88rem;
+      font-size: .87rem;
     }
 
     .stat-value {
-      font-size: clamp(1.35rem, 2.5vw, 1.9rem);
-      font-weight: 750;
-      letter-spacing: -.03em;
+      display: block;
+      margin-top: 6px;
+      font-size: 1.8rem;
+      font-weight: 800;
     }
-
-    .panel { overflow: hidden; }
 
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(160px, .8fr));
+      grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px);
       gap: 12px;
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
+      padding: 14px;
+      margin: 24px 0 16px;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
-      min-height: 42px;
-      padding: 9px 12px;
-      border: 1px solid #cfd4dc;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
       border-radius: 9px;
+      outline: none;
+      background: var(--panel-light);
       color: var(--text);
-      background: white;
       font: inherit;
     }
 
-    input:focus, select:focus {
-      outline: 3px solid #d9ddff;
-      border-color: var(--primary);
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 156, 255, .14);
     }
 
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1000px;
+    .results-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 2px 12px;
+      color: var(--muted);
+      font-size: .9rem;
     }
 
-    th, td {
-      padding: 13px 14px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: top;
+    .records {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      color: #475467;
-      background: #f9fafb;
-      font-size: .78rem;
-      letter-spacing: .04em;
-      text-transform: uppercase;
+    .record {
+      padding: 17px;
+      transition: transform .15s ease, border-color .15s ease;
     }
 
-    td { font-size: .91rem; line-height: 1.45; }
-    tbody tr:hover { background: #fafbff; }
-    tbody tr:last-child td { border-bottom: 0; }
+    .record:hover {
+      transform: translateY(-2px);
+      border-color: #42577f;
+    }
 
-    .contact { font-weight: 750; white-space: nowrap; }
-    .date, .amount { white-space: nowrap; }
-    .amount { font-weight: 700; }
+    .record-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .record h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .record-id {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .82rem;
+    }
 
     .badge {
-      display: inline-block;
-      margin: 2px 4px 2px 0;
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 27px;
       padding: 4px 9px;
+      border: 1px solid transparent;
       border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 750;
+    }
+
+    .badge-negociacao {
+      border-color: rgba(114, 183, 255, .3);
+      background: rgba(114, 183, 255, .12);
+      color: #a9d5ff;
+    }
+
+    .badge-ganha {
+      border-color: rgba(98, 214, 165, .3);
+      background: rgba(98, 214, 165, .12);
+      color: #9af0cb;
+    }
+
+    .badge-contato {
+      border-color: rgba(255, 209, 102, .3);
+      background: rgba(255, 209, 102, .12);
+      color: #ffe29a;
+    }
+
+    .record-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .detail-label {
+      display: block;
+      color: var(--muted);
       font-size: .78rem;
-      font-weight: 700;
-      white-space: nowrap;
     }
 
-    .badge-won {
-      color: var(--green);
-      background: var(--green-light);
+    .detail-value {
+      display: block;
+      margin-top: 3px;
+      font-size: .91rem;
+      font-weight: 650;
     }
 
-    .badge-active {
-      color: var(--primary);
-      background: var(--primary-light);
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
     }
-
-    .muted { color: var(--muted); }
-    .empty { padding: 28px; text-align: center; color: var(--muted); }
-    .result-count { padding: 12px 16px; color: var(--muted); font-size: .88rem; }
 
     footer {
-      padding: 18px 0 30px;
+      margin-top: 26px;
       color: var(--muted);
-      font-size: .85rem;
-      line-height: 1.5;
+      font-size: .82rem;
+      text-align: center;
     }
 
-    @media (max-width: 780px) {
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .toolbar { grid-template-columns: 1fr; }
+    @media (max-width: 760px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .records {
+        grid-template-columns: 1fr;
+      }
     }
 
-    @media (max-width: 440px) {
-      .container { width: min(100% - 20px, 1400px); }
-      .stats { gap: 9px; }
-      .stat { padding: 14px; }
+    @media (max-width: 520px) {
+      .container {
+        width: min(100% - 22px, 1120px);
+        padding-top: 28px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .record-top {
+        flex-direction: column;
+      }
+
+      .record-details {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1>Pipeline Comercial</h1>
-      <p>
-        Visão resumida dos contatos do CRM, com etapa, valor registrado,
-        contexto comercial e próximo passo identificado nas notas.
-      </p>
-    </div>
-  </header>
-
   <main class="container">
-    <div class="notice">
-      <strong>Versão para publicação:</strong> contatos identificados por número
-      e dados diretos de identificação removidos. O CSV original também contém
-      dados pessoais e comerciais que não devem ser publicados em um repositório
-      público sem autorização e revisão adequada.
-    </div>
+    <header>
+      <p class="eyebrow">Painel comercial</p>
+      <h1>Pipeline de vendas</h1>
+      <p class="subtitle">
+        Visão anonimizada dos contatos e dos respectivos estágios registrados no CRM.
+      </p>
+    </header>
+
+    <aside class="privacy-note">
+      <strong>Privacidade:</strong> esta versão não apresenta nomes, dados de contato,
+      documentos, valores de negociação nem notas internas. Os identificadores são
+      referências anônimas para publicação pública.
+    </aside>
 
     <section class="stats" aria-label="Resumo da pipeline">
-      <article class="stat">
-        <span class="stat-label">Contatos na lista</span>
-        <div class="stat-value" id="totalContacts">—</div>
+      <article class="stat-card">
+        <span class="stat-label">Contatos na base</span>
+        <strong class="stat-value" id="totalCount">0</strong>
       </article>
-      <article class="stat">
-        <span class="stat-label">Etapa “Venda ganha”</span>
-        <div class="stat-value" id="wonContacts">—</div>
+      <article class="stat-card">
+        <span class="stat-label">Em negociação</span>
+        <strong class="stat-value" id="negotiationCount">0</strong>
       </article>
-      <article class="stat">
-        <span class="stat-label">Valor total registrado</span>
-        <div class="stat-value" id="totalValue">—</div>
+      <article class="stat-card">
+        <span class="stat-label">Venda ganha</span>
+        <strong class="stat-value" id="wonCount">0</strong>
       </article>
-      <article class="stat">
-        <span class="stat-label">Valor em “Venda ganha”</span>
-        <div class="stat-value" id="wonValue">—</div>
+      <article class="stat-card">
+        <span class="stat-label">Em contato</span>
+        <strong class="stat-value" id="contactCount">0</strong>
       </article>
     </section>
 
-    <section class="panel" aria-label="Lista de contatos">
-      <div class="toolbar">
-        <input
-          id="search"
-          type="search"
-          placeholder="Buscar por contato, perfil ou resumo…"
-          aria-label="Buscar contatos"
-        >
-        <select id="stageFilter" aria-label="Filtrar por etapa">
-          <option value="">Todas as etapas</option>
-        </select>
-        <select id="statusFilter" aria-label="Filtrar por status">
-          <option value="">Todos os status</option>
-        </select>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Contato</th>
-              <th>Criação</th>
-              <th>Status CRM</th>
-              <th>Etapa</th>
-              <th>Valor</th>
-              <th>Perfil / contexto</th>
-              <th>Resumo e próximo passo</th>
-            </tr>
-          </thead>
-          <tbody id="contactRows"></tbody>
-        </table>
-        <div id="emptyState" class="empty" hidden>
-          Nenhum contato corresponde aos filtros selecionados.
-        </div>
-      </div>
-      <div class="result-count" id="resultCount"></div>
+    <section class="toolbar" aria-label="Busca e filtros">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Buscar por identificador ou estágio..."
+        aria-label="Buscar contatos"
+      >
+      <select id="stageFilter" aria-label="Filtrar por estágio">
+        <option value="">Todos os estágios</option>
+        <option value="Negociação">Negociação</option>
+        <option value="Venda ganha">Venda ganha</option>
+        <option value="3º Contato DIA3 (Ligação + Wpp)">3º contato</option>
+      </select>
     </section>
+
+    <div class="results-line">
+      <span id="resultCount">Exibindo 0 registros</span>
+      <span>Status geral CRM: Aberto</span>
+    </div>
+
+    <section class="records" id="records" aria-label="Contatos da pipeline"></section>
 
     <footer>
-      Os valores são os registrados no campo “value” do arquivo CSV e não
-      representam necessariamente valores recebidos. “Status CRM” e “Etapa”
-      foram mantidos como campos distintos, conforme aparecem na planilha.
-      Resumos editoriais foram condensados a partir das notas comerciais;
-      dados pessoais, documentos e diagnósticos individuais foram omitidos.
+      Dados de pipeline anonimizados para demonstração pública.
     </footer>
   </main>
 
   <script>
+    /*
+      Registros em ordem correspondente à planilha de origem.
+      Os identificadores abaixo não revelam a identidade dos clientes.
+    */
     const contacts = [
-      {
-        id: 1,
-        date: "28/09/2026 15:33",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Não informado",
-        summary: "Nota comercial indica reunião de alinhamento nesta semana para definir o fluxo de pagamento."
-      },
-      {
-        id: 2,
-        date: "26/09/2026 11:44",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 80000,
-        profile: "Proprietário de terreno; projeto na região Sudeste",
-        summary: "As notas indicam decisão de entrar na mentoria. Próximo passo: alinhar como viabilizar a entrada. O contato busca apresentar seu projeto e avançar com investidores."
-      },
-      {
-        id: 3,
-        date: "26/09/2026 10:17",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 50000,
-        profile: "Corretor; projeto na região Sul",
-        summary: "Quer conversar com a liderança para entender a utilidade do clube e o possível retorno. As notas mencionam área na região e busca por investidores/parceiros."
-      },
-      {
-        id: 4,
-        date: "26/09/2026 10:14",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 160000,
-        profile: "Atuação em mercado financeiro e negócios imobiliários",
-        summary: "Venda marcada como ganha. Há um cronograma de pagamentos parcelados registrado nas notas."
-      },
-      {
-        id: 5,
-        date: "26/09/2026 10:13",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 160000,
-        profile: "Empresário do setor hoteleiro",
-        summary: "Venda marcada como ganha. Possui projeto hoteleiro pronto e busca investidores, parceiros estratégicos e networking."
-      },
-      {
-        id: 6,
-        date: "25/09/2026 14:53",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Não informado",
-        summary: "Nota indica decisão pela entrada no clube e cadastro/vaga já garantidos. Próximo passo: organizar o formato de pagamento."
-      },
-      {
-        id: 7,
-        date: "25/09/2026 14:52",
-        status: "Aberto",
-        stage: "3º Contato DIA3 (Ligação + Wpp)",
-        value: 80000,
-        profile: "Proprietária de terreno; projeto na região Centro-Oeste",
-        summary: "Inscrição realizada e sinal enviado. A nota registra acompanhamento para confirmação de participação de uma convidada e continuidade da entrada no clube."
-      },
-      {
-        id: 8,
-        date: "24/09/2026 19:30",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Construtora e implantação hoteleira",
-        summary: "Contato marcado como de alta prioridade. Atua com construção e implantação de hotéis e atende grandes operadores do setor."
-      },
-      {
-        id: 9,
-        date: "24/09/2026 19:29",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 80000,
-        profile: "Proprietária e gestora de hotel",
-        summary: "Venda marcada como ganha. Tem terreno próprio e projeto hoteleiro de alto padrão; busca aporte para implantação e pretende manter a gestão."
-      },
-      {
-        id: 10,
-        date: "24/09/2026 19:18",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Perfil não especificado",
-        summary: "Nota registra reunião presencial para o dia seguinte e indica que é forte candidato a uma mentoria individual."
-      },
-      {
-        id: 11,
-        date: "24/09/2026 19:04",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 150000,
-        profile: "Hoteleiro",
-        summary: "Venda marcada como ganha. Nota registra contrato assinado e sinal pago; o saldo seria tratado posteriormente conforme o fluxo combinado."
-      },
-      {
-        id: 12,
-        date: "24/09/2026 18:55",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Proprietária de projeto de condo-hotel; região Sul",
-        summary: "Já estava em contato com outro integrante da equipe e inscrita no evento. Nota indica transferência do acompanhamento para esse responsável."
-      },
-      {
-        id: 13,
-        date: "24/09/2026 18:52",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 152000,
-        profile: "Consultoria de ecoturismo",
-        summary: "Venda marcada como ganha. Nota registra contrato assinado e pagamento parcial; o próximo passo é confirmar a conclusão do pagamento e o acesso ao clube."
-      },
-      {
-        id: 14,
-        date: "24/09/2026 18:50",
-        status: "Aberto",
-        stage: "Venda ganha",
-        value: 160000,
-        profile: "Arquiteta e desenvolvedora",
-        summary: "Venda marcada como ganha. Possui terreno e projetos próprios aprovados; havia reunião de acompanhamento registrada."
-      },
-      {
-        id: 15,
-        date: "24/09/2026 18:48",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Proprietária / empresária",
-        summary: "Estuda expansão de propriedade em operação para hotelaria, hotel-fazenda ou ecoturismo de luxo. Busca investidores qualificados e conexões estratégicas."
-      },
-      {
-        id: 16,
-        date: "24/09/2026 11:34",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 50000,
-        profile: "Corretora de imóveis e incorporação",
-        summary: "A nota indica que está sendo viabilizada a entrada de duas pessoas em conjunto em uma mentoria."
-      },
-      {
-        id: 17,
-        date: "24/09/2026 11:33",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 50000,
-        profile: "Engenharia / arquitetura; projeto na região Sul",
-        summary: "Desenvolve projeto de condo-hotel. Próximo passo indicado: apresentar a possibilidade de dividir uma vaga de mentoria com outra pessoa."
-      },
-      {
-        id: 18,
-        date: "24/09/2026 11:32",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Proprietário de terreno",
-        summary: "Nota indica contrato assinado. Próximo passo: alinhamento para entrada no clube e definição da forma de pagamento."
-      },
-      {
-        id: 19,
-        date: "24/09/2026 11:31",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Perfil não informado",
-        summary: "Nota registra contrato assinado e sinal pago. Próximo passo: reunião para organizar o fluxo de pagamento."
-      },
-      {
-        id: 20,
-        date: "15/07/2026 18:07",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 80000,
-        profile: "Arquiteta; hotelaria e desenvolvimento imobiliário",
-        summary: "Procura uma parceira ou parceiro para dividir a mentoria. A nota indica que a equipe está tentando viabilizar essa composição."
-      },
-      {
-        id: 21,
-        date: "15/05/2026 12:13",
-        status: "Aberto",
-        stage: "Negociação",
-        value: 160000,
-        profile: "Perfil não informado",
-        summary: "O CSV não contém notas comerciais ou próximo passo preenchido para este contato."
-      }
+      { id: "Lead 01", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 02", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 03", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 04", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 05", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 06", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 07", stage: "3º Contato DIA3 (Ligação + Wpp)", status: "Aberto" },
+      { id: "Lead 08", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 09", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 10", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 11", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 12", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 13", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 14", stage: "Venda ganha", status: "Aberto" },
+      { id: "Lead 15", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 16", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 17", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 18", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 19", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 20", stage: "Negociação", status: "Aberto" },
+      { id: "Lead 21", stage: "Negociação", status: "Aberto" }
     ];
 
-    const currency = new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      maximumFractionDigits: 0
-    });
-
-    const rowsElement = document.getElementById("contactRows");
-    const searchElement = document.getElementById("search");
+    const recordsElement = document.getElementById("records");
+    const searchInput = document.getElementById("searchInput");
     const stageFilter = document.getElementById("stageFilter");
-    const statusFilter = document.getElementById("statusFilter");
-    const emptyState = document.getElementById("emptyState");
-    const resultCount = document.getElementById("resultCount");
 
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      })[character]);
+    function getBadgeClass(stage) {
+      if (stage === "Venda ganha") return "badge-ganha";
+      if (stage.startsWith("3º Contato")) return "badge-contato";
+      return "badge-negociacao";
     }
 
-    function populateFilters() {
-      const stages = [...new Set(contacts.map(contact => contact.stage))].sort();
-      const statuses = [...new Set(contacts.map(contact => contact.status))].sort();
-
-      stages.forEach(stage => {
-        const option = document.createElement("option");
-        option.value = stage;
-        option.textContent = stage;
-        stageFilter.appendChild(option);
-      });
-
-      statuses.forEach(status => {
-        const option = document.createElement("option");
-        option.value = status;
-        option.textContent = status;
-        statusFilter.appendChild(option);
-      });
-    }
-
-    function renderStats() {
-      const won = contacts.filter(contact => contact.stage === "Venda ganha");
-      const totalValue = contacts.reduce((sum, contact) => sum + contact.value, 0);
-      const wonValue = won.reduce((sum, contact) => sum + contact.value, 0);
-
-      document.getElementById("totalContacts").textContent = contacts.length;
-      document.getElementById("wonContacts").textContent = won.length;
-      document.getElementById("totalValue").textContent = currency.format(totalValue);
-      document.getElementById("wonValue").textContent = currency.format(wonValue);
+    function updateSummary() {
+      document.getElementById("totalCount").textContent = contacts.length;
+      document.getElementById("negotiationCount").textContent =
+        contacts.filter(contact => contact.stage === "Negociação").length;
+      document.getElementById("wonCount").textContent =
+        contacts.filter(contact => contact.stage === "Venda ganha").length;
+      document.getElementById("contactCount").textContent =
+        contacts.filter(contact => contact.stage.startsWith("3º Contato")).length;
     }
 
     function renderContacts() {
-      const query = searchElement.value.trim().toLocaleLowerCase("pt-BR");
+      const query = searchInput.value.trim().toLocaleLowerCase("pt-BR");
       const selectedStage = stageFilter.value;
-      const selectedStatus = statusFilter.value;
 
-      const filtered = contacts.filter(contact => {
-        const searchable = [
-          `Contato ${String(contact.id).padStart(2, "0")}`,
-          contact.profile,
-          contact.summary,
-          contact.stage,
-          contact.status
-        ].join(" ").toLocaleLowerCase("pt-BR");
+      const filteredContacts = contacts.filter(contact => {
+        const matchesQuery =
+          contact.id.toLocaleLowerCase("pt-BR").includes(query) ||
+          contact.stage.toLocaleLowerCase("pt-BR").includes(query);
 
-        return searchable.includes(query)
-          && (!selectedStage || contact.stage === selectedStage)
-          && (!selectedStatus || contact.status === selectedStatus);
+        const matchesStage =
+          !selectedStage || contact.stage === selectedStage;
+
+        return matchesQuery && matchesStage;
       });
 
-      rowsElement.innerHTML = filtered.map(contact => {
-        const isWon = contact.stage === "Venda ganha";
-        const badgeClass = isWon ? "badge-won" : "badge-active";
+      document.getElementById("resultCount").textContent =
+        `Exibindo ${filteredContacts.length} de ${contacts.length} registros`;
 
-        return `
-          <tr>
-            <td class="contact">Contato ${String(contact.id).padStart(2, "0")}</td>
-            <td class="date">${escapeHtml(contact.date)}</td>
-            <td><span class="badge badge-active">${escapeHtml(contact.status)}</span></td>
-            <td><span class="badge ${badgeClass}">${escapeHtml(contact.stage)}</span></td>
-            <td class="amount">${currency.format(contact.value)}</td>
-            <td>${escapeHtml(contact.profile)}</td>
-            <td>${escapeHtml(contact.summary)}</td>
-          </tr>
-        `;
-      }).join("");
+      if (filteredContacts.length === 0) {
+        recordsElement.innerHTML =
+          '<div class="empty-state">Nenhum registro corresponde à busca.</div>';
+        return;
+      }
 
-      emptyState.hidden = filtered.length !== 0;
-      resultCount.textContent =
-        `Exibindo ${filtered.length} de ${contacts.length} contatos.`;
+      recordsElement.innerHTML = filteredContacts.map(contact => `
+        <article class="record">
+          <div class="record-top">
+            <div>
+              <h2>${contact.id}</h2>
+              <span class="record-id">Identificador anonimizado</span>
+            </div>
+            <span class="badge ${getBadgeClass(contact.stage)}">
+              ${contact.stage}
+            </span>
+          </div>
+          <div class="record-details">
+            <div>
+              <span class="detail-label">Status no CRM</span>
+              <span class="detail-value">${contact.status}</span>
+            </div>
+            <div>
+              <span class="detail-label">Estágio comercial</span>
+              <span class="detail-value">${contact.stage}</span>
+            </div>
+          </div>
+        </article>
+      `).join("");
     }
 
-    populateFilters();
-    renderStats();
-    renderContacts();
-
-    searchElement.addEventListener("input", renderContacts);
+    searchInput.addEventListener("input", renderContacts);
     stageFilter.addEventListener("change", renderContacts);
-    statusFilter.addEventListener("change", renderContacts);
+
+    updateSummary();
+    renderContacts();
   </script>
 </body>
 </html>
